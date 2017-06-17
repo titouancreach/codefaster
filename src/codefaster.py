@@ -5,6 +5,7 @@ import itertools
 import logging
 import os.path
 import random
+from functools import partial
 
 import config
 
@@ -36,8 +37,6 @@ def randomline(files_path):
         :return a random lien
     """
     selectedfile = random.choice(files_path)
-
-    logging.debug(selectedfile)
 
     selectedline = ''
 
@@ -75,7 +74,13 @@ def configui(stdscr):
     stdscr.keypad(True)
 
 
-def mainloop(stdscr, win):
+def mainloop(stdscr, win, files_path):
+
+    line = randomlinevalid(files_path)
+
+    win.addstr(1, 1, line)
+    win.refresh()
+
     try:
         while True:
             stdscr.getch()
@@ -100,7 +105,7 @@ def lineisvalid(line):
     return line != ''
 
 
-def startui(stdscr):
+def startui(files_path, stdscr):
     """
     Start the UI mode.
     The screen handle is created by the wrapper and is
@@ -114,7 +119,7 @@ def startui(stdscr):
     stdscr.refresh()
     win.refresh()
 
-    mainloop(stdscr, win)
+    mainloop(stdscr, win, files_path)
 
 
 if __name__ == '__main__':
@@ -131,8 +136,9 @@ if __name__ == '__main__':
     logging.info('Finished, {} files where found...'.format(len(filenames)))
     logging.info('Starting UI')
 
-    curses.wrapper(startui)
+    f = partial(startui, filenames)
+
+    curses.wrapper(f)
 
     logging.info('bye !')
 
-    logging.debug(randomlinevalid(filenames))
