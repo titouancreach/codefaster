@@ -74,12 +74,12 @@ def configui(stdscr):
     stdscr.keypad(True)
 
 
-def mainloop(stdscr, win, files_path):
+def mainloop(stdscr, win, linebox, inputbox, files_path):
 
     line = randomlinevalid(files_path)
 
-    win.addstr(1, 1, line)
-    win.refresh()
+    linebox.addstr(1, 1, line)
+    linebox.refresh()
 
     try:
         while True:
@@ -116,10 +116,19 @@ def startui(files_path, stdscr):
 
     win = curses.newwin(curses.LINES - 1, curses.COLS - 1, 0, 0)
     win.box()
+
+    linebox = curses.newwin(3, curses.COLS - 3, 1, 1)
+    linebox.box()
+
+    inputbox = curses.newwin(3, curses.COLS - 3, 4, 1)
+    inputbox.box()
+
     stdscr.refresh()
     win.refresh()
+    inputbox.refresh()
+    linebox.refresh()
 
-    mainloop(stdscr, win, files_path)
+    mainloop(stdscr, win, linebox, inputbox, files_path)
 
 
 if __name__ == '__main__':
