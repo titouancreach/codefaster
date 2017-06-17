@@ -4,6 +4,7 @@ import glob
 import itertools
 import logging
 import os.path
+import random
 
 import config
 
@@ -28,6 +29,42 @@ def scan_basedir(basedir, fileext):
     return itertools.chain(*filenames)
 
 
+def randomline(files_path):
+    """
+    Retrieve a random line from a file contained in files_path
+        :param files_path list of paths
+        :return a random lien
+    """
+    selectedfile = random.choice(files_path)
+
+    logging.debug(selectedfile)
+
+    selectedline = ''
+
+    # (Waterman's "Reservoir Algorithm")
+    with open(selectedfile) as f:
+        line = next(f)
+        for num, line in enumerate(f):
+            if random.randrange(num + 2):
+                continue
+            selectedline = line
+        return selectedline
+
+
+def randomlinevalid(files_path):
+    """
+    Get a random line from the file that fit our requierements
+        :param files_path list of paths
+        :return a random line
+    """
+    line = ''  # not valid line for start
+    while not lineisvalid(line):
+        line = randomline(files_path)
+        line = cleanline(line)
+
+    return line
+
+
 def configui(stdscr):
     """
     Configure the UI.
@@ -44,6 +81,23 @@ def mainloop(stdscr, win):
             stdscr.getch()
     except KeyboardInterrupt:
         pass
+
+
+def cleanline(line):
+    """
+    Clean the line, replace tabs by space, remove trailings spaces
+        :param line the line to clean
+    """
+    return line.replace('\t', ' ' * 4).strip(' \n')
+
+
+def lineisvalid(line):
+    """
+    Tell if the line is valid.
+        :param line the line to test
+        :return True if the line is valid false otherwise
+    """
+    return line != ''
 
 
 def startui(stdscr):
@@ -80,3 +134,5 @@ if __name__ == '__main__':
     curses.wrapper(startui)
 
     logging.info('bye !')
+
+    logging.debug(randomlinevalid(filenames))
