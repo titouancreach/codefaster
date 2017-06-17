@@ -12,6 +12,8 @@ import config
 logging.basicConfig(level=config.LOGGING_LEVEL,
                     format='%(asctime)s -- %(message)s')
 
+AUTHORIZED_INPUT = list(range(32, 126))
+
 
 def scan_basedir(basedir, fileext):
     """
@@ -87,11 +89,31 @@ def mainloop(stdscr, win, linebox, inputbox, files_path):
     line = randomlinevalid(files_path)
 
     linebox.addstr(1, 1, line)
+
+    inputbox.move(1, 1)
+    inputbox.nodelay(True)
+
     linebox.refresh()
+    inputbox.refresh()
+
+    inputline = ''
 
     try:
         while True:
-            stdscr.getch()
+            c = inputbox.getch()
+
+            if c != -1 and c in AUTHORIZED_INPUT:
+                inputline += chr(c)
+                inputbox.erase()
+                inputbox.box()
+                inputbox.addstr(1, 1, inputline)
+                inputbox.move(1, len(inputline))
+
+                stdscr.refresh()
+                win.refresh()
+                inputbox.refresh()
+                linebox.refresh()
+
     except KeyboardInterrupt:
         pass
 
