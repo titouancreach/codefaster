@@ -1,3 +1,5 @@
+from functools import partial
+
 import argparse
 import curses
 import glob
@@ -5,8 +7,6 @@ import itertools
 import logging
 import os.path
 import random
-from functools import partial
-
 import config
 
 logging.basicConfig(level=config.LOGGING_LEVEL,
@@ -56,7 +56,7 @@ def randomlinevalid(files_path):
         :param files_path list of paths
         :return a random line
     """
-    line = ''  # not valid line for start
+    line = ''  # not valid line at start
     while not lineisvalid(line):
         line = randomline(files_path)
         line = cleanline(line)
@@ -75,6 +75,14 @@ def configui(stdscr):
 
 
 def mainloop(stdscr, win, linebox, inputbox, files_path):
+    """
+    Manage events
+        :param stdscr curse screen handle
+        :param win curse main window handle
+        :param linebox curse box handle where the line is displayed
+        :param inputbox curse box handle where the input is displayed
+        :param files_path the file list where we fetch the line
+    """
 
     line = randomlinevalid(files_path)
 
