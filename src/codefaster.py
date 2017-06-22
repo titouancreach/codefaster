@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
+
 import argparse
-import asyncio
 import config
 import glob
 import itertools
