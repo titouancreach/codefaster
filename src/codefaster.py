@@ -1,13 +1,30 @@
 import argparse
+import asyncio
 import config
 import glob
 import itertools
 import logging
 import os.path
 import random
+import signal
+import sys
+import re
+
+try:
+    from termcolor import colored
+except ImportError:
+    pass
+
 
 logging.basicConfig(level=config.LOGGING_LEVEL,
                     format='%(asctime)s -- %(message)s')
+
+
+class TimeoutException(Exception):
+    """
+    Exception that will be raised when the SIGALRM will be triggered.
+    """
+    pass
 
 
 def scan_basedir(basedir, fileext):
@@ -31,7 +48,7 @@ def randomline(files_path):
     """
     Retrieve a random line from a file contained in files_path
         :param files_path list of paths
-        :return a random lien
+        :return a random line
     """
     selectedfile = random.choice(files_path)
 
@@ -69,13 +86,50 @@ def cleanline(line):
     return line.replace('\t', ' ' * 4).strip(' \n')
 
 
+def startdactylo(files_path):
+
+    correct_line = 0
+    incorrect_line = 0
+
+    try:
+        while True:
+            rl = randomlinevalid(files_path)
+            print(rl)
+            v = input()
+            if v == rl:
+                correct_line += 1
+                if 'termcolor' in sys.modules:
+                    logging.info(colored('correct', 'green'))
+                else:
+                    logging.info('correct')
+            else:
+                incorrect_line += 1
+                if 'termcolor' in sys.modules:
+                    logging.info(colored('incorrect', 'red'))
+                else:
+                    logging.info('incorrect')
+
+    except TimeoutException:
+        return correct_line, incorrect_line
+
+
 def lineisvalid(line):
     """
     Tell if the line is valid.
         :param line the line to test
         :return True if the line is valid false otherwise
     """
-    return line != ''
+
+    matches = [re.match(x, line) for x in config.LINE_IGNORE_PATTERNS]
+
+    return line and not any(matches)
+
+
+def handle_sig_alarm(signum, frame):
+    """
+    handle SIGALRM signal
+    """
+    raise TimeoutException()
 
 
 if __name__ == '__main__':
@@ -90,7 +144,19 @@ if __name__ == '__main__':
     logging.info('Scanning...')
     filenames = list(filespath)
     logging.info('Finished, {} files where found...'.format(len(filenames)))
-    logging.info('Starting UI')
+
+    signal.signal(signal.SIGALRM, handle_sig_alarm)
+
+    signal.alarm(config.TIMEOUT)
+
+    correct_line, incorrect_line = startdactylo(filenames)
+
+    if 'termcolor' in sys.modules:
+        logging.info('\n\n' + colored(('You typed {} correct lines and {}'
+                                       ' incorrect lines')
+                     .format(correct_line, incorrect_line), 'green'))
+    else:
+        logging.info('\n\nYou typed {} correct lines and {} incorrect lines'
+                     .format(correct_line, incorrect_line))
 
     logging.info('bye !')
-
