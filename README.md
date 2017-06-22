@@ -19,7 +19,7 @@ Codefaster doesn't need any additional library to work. But you can install `ter
 FILE_EXT = ['py', 'c', 'css', 'cpp', 'h', 'hpp', 'hs', 'js', 'jsx', 'html',
             'ts']
 
-# Logging Level, use the 'logging module' constants0
+# Logging Level, use the 'logging module' constants.
 LOGGING_LEVEL = DEBUG
 
 # Test duration. 
